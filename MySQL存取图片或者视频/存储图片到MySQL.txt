@@ -1,0 +1,26 @@
+/**
+	 * 	测试插入图片到数据库中
+	 */
+	@Test
+	public void test3() {
+		JDBC_util jdbc_util = new JDBC_util();
+		String sql = "insert into people(name,birthday,photo) values(?,?,?)";
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		try {
+			conn = jdbc_util.connectionMysql();
+			ps = conn.prepareStatement(sql);
+			ps.setObject(1, "迪丽热巴");
+			ps.setObject(2, "1992-06-03");
+			
+			FileInputStream fis = new FileInputStream(new File("ReBa.jpg"));
+			
+			ps.setBlob(3, fis);
+			ps.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			jdbc_util.closeRecource(ps, conn);
+		}
+	}

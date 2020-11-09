@@ -1,0 +1,48 @@
+@Test
+	public void test4() {
+		JDBC_util jdbc_util = new JDBC_util();
+		String sql = "select name,birthday,photo from people where id=?";
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		InputStream is = null;
+		FileOutputStream fos = null;
+		try {
+			conn = jdbc_util.connectionMysql();
+			ps = conn.prepareStatement(sql);
+			ps.setObject(1, 4);
+			rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				String name = rs.getString(1);
+				Date birthday = rs.getDate(2);
+				System.out.println(name+" "+birthday);
+				Blob photo = rs.getBlob(3);
+				is = photo.getBinaryStream();
+				fos = new FileOutputStream(new File("DiLiReBa.jpg"));
+				byte[] buffer = new byte[1024];
+				int len;
+				while ((len = is.read(buffer)) != -1) {
+					fos.write(buffer, 0, len);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(is != null)
+					is.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				if(fos != null)
+					fos.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			jdbc_util.closeRecource(ps, conn);
+		}
+	}
