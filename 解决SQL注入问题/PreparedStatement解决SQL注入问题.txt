@@ -1,0 +1,41 @@
+/**
+	 * 	方式二：对方式一的迭代
+	 * 		PreparedStatement：有一个预编译的过程，把需要参数的地方使用？进行占位。
+	 * 	最后在执行SQL之前填充占位符即可。有效的解决了SQL注入问题。
+	 */
+	@Test
+	public void test2() {
+		JDBC_util jdbc_util = new JDBC_util();
+		
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("请输入id：");
+		int id = Integer.parseInt(scanner.nextLine());
+		System.out.print("请输入姓名：");
+		String name = scanner.nextLine();
+		String sql = "select * from people where id=? and name=?";
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			conn = jdbc_util.connectionMysql();
+			ps = conn.prepareStatement(sql);
+			ps.setObject(1, id);
+			ps.setObject(2, name);
+			rs = ps.executeQuery();
+			if (rs != null) {
+				System.out.println("登录成功");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			jdbc_util.closeRecource(ps, conn);
+		}
+	}
