@@ -1,0 +1,34 @@
+/*
+	 * 1、获取连接
+	 * JDBCUtil.getConnection();
+	 * 2、预编译SQL语句
+	 * prepareStatement(sql)
+	 * 3、填充占位符
+	 * setObject
+	 * 4、执行
+	 * executeUpdate()
+	 */
+	//通用版，对表的增删改
+	public int update(String sql,Object...args) {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		try {
+			conn = JDBCUtil.getConnection();
+			
+			ps = conn.prepareStatement(sql);
+//			ps.setObject(1, "林志玲");
+//			ps.setObject(2, "Linzl@139.cn");
+//			ps.setObject(3, "2000-01-01");
+			for (int i = 0; i < args.length; i++) {
+				ps.setObject(i+1, args[i]);
+			}
+			
+			int update = ps.executeUpdate();
+			return update;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			JDBCUtil.closeRecource(conn, ps);
+		}
+		return 0;
+	}

@@ -1,0 +1,57 @@
+/*
+	 * 1、获取连接
+	 * JDBCUtil.getConnection();
+	 * 2、预编译SQL语句
+	 * prepareStatement(sql)
+	 * 3、填充占位符
+	 * setObject
+	 * 4、执行
+	 * executeQuery()
+	 * 5、获取元数据
+	 * getMetaData()
+	 * 6、获取列数
+	 * getColumnCount()
+	 * 7、获取列名
+	 * getColumnLabel
+	 * 8、通过反射，将数据添加到对象中
+	 * 	Field field = Custom.class.getDeclaredField(columnName);
+		field.setAccessible(true);
+		field.set(t, columnValue);
+	 */
+	//通用版，对表的增删改
+	public <T> List<T> getForList(Class<T> clazz,String sql,Object...args) {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ResultSetMetaData md = null;
+		try {
+			conn = JDBCUtil.getConnection();
+			ps = conn.prepareStatement(sql);
+			for (int i = 0; i < args.length; i++) {
+				ps.setObject(i+1, args[i]);
+			}
+			
+			rs = ps.executeQuery();
+			md = rs.getMetaData();
+			int columnCount = md.getColumnCount();
+			ArrayList<T> list = new ArrayList<T>();
+			while (rs.next()) {
+				T t = clazz.newInstance();
+				for (int i = 0; i < columnCount; i++) {
+					String columnName = md.getColumnLabel(i+1);
+					Object columnValue = rs.getObject(i+1);
+					Field field = Custom.class.getDeclaredField(columnName);
+					field.setAccessible(true);
+					field.set(t, columnValue);
+				}
+				list.add(t);
+			}
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			JDBCUtil.closeRecource(conn,ps,rs);
+			
+		}
+		return null;
+	}
